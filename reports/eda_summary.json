@@ -1,0 +1,63 @@
+{
+  "split_sizes": {
+    "train": 3177,
+    "validation": 454,
+    "test": 908
+  },
+  "missing_report": {
+    "train": {
+      "missing_sources": 0,
+      "missing_summary/tiny": 2047,
+      "missing_summary/short": 967,
+      "missing_summary/long": 0
+    },
+    "validation": {
+      "missing_sources": 0,
+      "missing_summary/tiny": 293,
+      "missing_summary/short": 142,
+      "missing_summary/long": 0
+    },
+    "test": {
+      "missing_sources": 0,
+      "missing_summary/tiny": 596,
+      "missing_summary/short": 292,
+      "missing_summary/long": 0
+    }
+  },
+  "document_length_words": {
+    "mean": 61538.58757435559,
+    "median": 24546.0,
+    "p90": 132221.80000000025,
+    "max": 3565130.0
+  },
+  "summary_length_words": {
+    "summary/tiny": {
+      "count": 1603,
+      "mean": 21.181534622582657,
+      "median": 19.0
+    },
+    "summary/short": {
+      "count": 3138,
+      "mean": 112.96876991714468,
+      "median": 100.0
+    },
+    "summary/long": {
+      "count": 4539,
+      "mean": 545.7199823749725,
+      "median": 419.0
+    }
+  },
+  "granularity_availability": {
+    "summary/tiny": 1603,
+    "summary/short": 3138,
+    "summary/long": 4539
+  },
+  "token_counts_sampled": {
+    "sample_size": 100,
+    "mean": 35635.18,
+    "median": 46990.0,
+    "p90": 55493.5
+  },
+  "pct_docs_exceeding_512_tokens": 100.0,
+  "pct_docs_exceeding_1024_tokens": 100.0
+}
