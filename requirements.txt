@@ -15,3 +15,7 @@ pandas
 scikit-learn
 matplotlib
 tqdm
+bert_score
+nltk
+absl-py
+sacrebleu
