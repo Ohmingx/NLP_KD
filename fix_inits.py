@@ -5,7 +5,6 @@ folders_needing_init = [
     "src",
     "src/preprocessing",
     "src/ocr",
-    "src/models",
     "src/train",
     "src/eval"
 ]
