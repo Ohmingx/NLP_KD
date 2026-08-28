@@ -3,7 +3,6 @@ import torch
 import torch.nn.functional as F
 from transformers import Seq2SeqTrainer
 
-
 class DistillationTrainer(Seq2SeqTrainer):
     """
     Implements both E2 (standard KD) and E3 (confidence-aware KD).
@@ -28,6 +27,10 @@ class DistillationTrainer(Seq2SeqTrainer):
     ):
         super().__init__(**kwargs)
         self.teacher = teacher_model
+        
+        # CRITICAL FIX: Move teacher to the GPU before freezing it
+        self.teacher = self.teacher.to(self.args.device)
+        
         self.teacher.eval()
         for p in self.teacher.parameters():
             p.requires_grad_(False)
@@ -42,11 +45,7 @@ class DistillationTrainer(Seq2SeqTrainer):
         self._step_count = 0
 
     def _compute_teacher_confidence(self, teacher_logits, mask):
-        """
-        Confidence computed from the teacher's TRUE (T=1) distribution,
-        not the temperature-softened one used for KL matching.
-        Returns per-token weights normalized to mean 1 over valid tokens.
-        """
+        # Confidence computed from the teacher's TRUE (T=1) distribution
         teacher_probs_true = F.softmax(teacher_logits, dim=-1)
 
         if self.confidence_method == "entropy":
@@ -64,7 +63,7 @@ class DistillationTrainer(Seq2SeqTrainer):
         if self.weight_power != 1.0:
             confidence = confidence.pow(self.weight_power)
 
-        # Normalize so mean weight over valid tokens == 1 (keeps loss scale comparable to E2)
+        # Normalize so mean weight over valid tokens == 1 
         valid_confidence = confidence[mask]
         mean_conf = valid_confidence.mean().clamp(min=1e-6)
         weights = confidence / mean_conf
