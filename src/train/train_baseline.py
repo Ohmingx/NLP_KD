@@ -46,7 +46,8 @@ def train_baseline_student():
         save_total_limit=2,
         num_train_epochs=3,
         predict_with_generate=False,
-        fp16=torch.cuda.is_available(),
+        fp16=False,                # <-- Set to False to prevent T5 FP16 NaN explosion
+        bf16=False,                # <-- Keep False unless running on an Ampere GPU (A100/H100)
         logging_dir="./logs/student_baseline",
         logging_steps=20,
         report_to="none"
