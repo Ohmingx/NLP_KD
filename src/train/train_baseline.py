@@ -36,6 +36,8 @@ def train_baseline_student():
         eval_strategy="epoch",
         save_strategy="epoch",
         learning_rate=5e-5,
+        seed=42,
+        data_seed=42,
         per_device_train_batch_size=4,
         per_device_eval_batch_size=4,
         gradient_accumulation_steps=4,
