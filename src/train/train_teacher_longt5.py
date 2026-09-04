@@ -2,7 +2,7 @@ import os
 import numpy as np
 import evaluate
 import torch
-
+from peft import get_peft_model, LoraConfig, TaskType
 from transformers import (
     AutoModelForSeq2SeqLM,
     AutoTokenizer,
@@ -100,6 +100,23 @@ def train_teacher():
 
     model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
 
+    # --- NEW PEFT/LORA CODE ---
+    lora_config = LoraConfig(
+    task_type=TaskType.SEQ_2_SEQ_LM,
+    r=8, 
+    lora_alpha=32,
+    lora_dropout=0.05,
+    target_modules=["q", "v"] # Targets attention mechanisms
+     )
+
+    model = get_peft_model(model, lora_config)
+
+    # Required for gradient checkpointing to work alongside LoRA
+    model.enable_input_require_grads()
+    model.print_trainable_parameters()
+    # --------------------------
+
+
     data_collator = DataCollatorForSeq2Seq(
         tokenizer,
         model=model
@@ -126,7 +143,7 @@ def train_teacher():
         max_grad_norm=1.0,
         warmup_ratio=0.05,
 
-        optim="adafactor",
+        optim="adamw_8bit",
         weight_decay=0.01,
 
         save_total_limit=2,
@@ -135,13 +152,13 @@ def train_teacher():
 
         predict_with_generate=True,
         generation_max_length=MAX_TARGET_LENGTH,
-        generation_num_beams=4,
+        generation_num_beams=2,
 
         metric_for_best_model="rouge1",
         greater_is_better=True,
         load_best_model_at_end=True,
 
-        fp16=True,
+        fp16=False,
         bf16=False,
         
         logging_dir="./logs/teacher",
@@ -170,7 +187,7 @@ def train_teacher():
 
     os.makedirs(final_path, exist_ok=True)
 
-    trainer.save_model(final_path)
+    trainer.model.save_pretrained(final_path)
     tokenizer.save_pretrained(final_path)
 
 
