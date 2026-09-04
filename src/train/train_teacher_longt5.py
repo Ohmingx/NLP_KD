@@ -131,7 +131,7 @@ def train_teacher():
 
         save_total_limit=2,
 
-        num_train_epochs=3,
+        num_train_epochs=2,
 
         predict_with_generate=True,
         generation_max_length=MAX_TARGET_LENGTH,
