@@ -1,6 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import numpy as np
 import evaluate
 import torch
@@ -11,6 +9,7 @@ from transformers import (
     Seq2SeqTrainingArguments,
     Seq2SeqTrainer,
     DataCollatorForSeq2Seq,
+    AutoConfig,
 )
 
 from src.preprocessing.data_loader import load_multilexsum
@@ -100,14 +99,12 @@ def train_teacher():
     max_target_length=MAX_TARGET_LENGTH,
      )
 
-    model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
+    config = AutoConfig.from_pretrained(MODEL_NAME)
+    config.tie_word_embeddings = True
+
+    model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME, config=config)
     
-    # --- CRITICAL FIX: MANUALLY TIE WEIGHTS ---
-    # Prevents the model from being initialized with random noise
-    model.encoder.embed_tokens.weight = model.shared.weight
-    model.decoder.embed_tokens.weight = model.shared.weight
-    model.lm_head.weight = model.shared.weight
-    # ------------------------------------------
+    
     # --- NEW PEFT/LORA CODE ---
     lora_config = LoraConfig(
     task_type=TaskType.SEQ_2_SEQ_LM,
