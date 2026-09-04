@@ -141,8 +141,9 @@ def train_teacher():
         greater_is_better=True,
         load_best_model_at_end=True,
 
-        bf16=torch.cuda.is_bf16_supported(),
-
+        fp16=True,
+        bf16=False,
+        
         logging_dir="./logs/teacher",
         logging_steps=20,
 
