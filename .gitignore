@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -8,11 +8,13 @@ venv/
 env/
 .env
 
-# Datasets and checkpoints (Do not commit to Git)
+# Datasets, checkpoints, models, and logs
 data/raw/*
 checkpoints/*
 saved_models/*
 logs/*
+
+# Large model/data files
 *.safetensors
 *.bin
 *.pkl
