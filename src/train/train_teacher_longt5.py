@@ -107,22 +107,24 @@ def train_teacher():
         lambda x: len(x["input_ids"]) > 2 and len(x["labels"]) > 2
     )
 
-    # 2. FIX THE CONFIG
-    config = AutoConfig.from_pretrained(MODEL_NAME)
-    config.tie_word_embeddings = True
+   
 
     # 3. LOAD NATIVE PYTORCH WEIGHTS (Bypasses Flax & Safetensors bugs)
     print("Loading base model...")
     model = AutoModelForSeq2SeqLM.from_pretrained(
         MODEL_NAME, 
-        config=config,
         use_safetensors=False 
     )
 
-    # 4. SMOKE TEST
+    # 2. FORCE HARD TIE THE WEIGHTS (Bypasses the Hub file conflict)
+    model.encoder.embed_tokens.weight = model.shared.weight
+    model.decoder.embed_tokens.weight = model.shared.weight
+    model.lm_head.weight = model.shared.weight
+
+    # 3. SMOKE TEST (with repetition penalty to prevent infinite loops on a fresh model)
     print("\n--- RUNNING EMBEDDING SMOKE TEST ---")
     test_in = tokenizer("summarize: The quick brown fox jumps over the lazy dog.", return_tensors="pt")
-    out = model.generate(**test_in, max_new_tokens=20)
+    out = model.generate(**test_in, max_new_tokens=20, no_repeat_ngram_size=2)
     smoke_test_result = tokenizer.decode(out[0], skip_special_tokens=True)
     print(f"Output: {smoke_test_result}")
     print("------------------------------------\n")
