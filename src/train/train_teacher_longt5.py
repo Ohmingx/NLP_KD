@@ -12,7 +12,7 @@ from transformers import (
 )
 
 from src.preprocessing.data_loader import load_multilexsum
-from datasets import load_from_disk
+from src.preprocessing.document_selection import build_typed_tokenized_dataset
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -87,12 +87,12 @@ def train_teacher():
 
     raw_data = load_multilexsum()
 
-    tokenized_dataset = load_from_disk(
-    "./data/processed/tokenized_multilexsum"
-    )
-
-    tokenizer = AutoTokenizer.from_pretrained(
-    MODEL_NAME
+    tokenized_dataset, tokenizer = build_typed_tokenized_dataset(
+    parsed_data=data,
+    tokenizer_name=MODEL_NAME,
+    target_granularity="summary/short",
+    max_source_length=MAX_SOURCE_LENGTH,
+    max_target_length=MAX_TARGET_LENGTH,
      )
 
     model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
