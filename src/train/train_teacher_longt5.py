@@ -92,34 +92,54 @@ def train_teacher():
     )
 
     tokenized_dataset, tokenizer = build_typed_tokenized_dataset(
-    parsed_data=data,
-    tokenizer_name=MODEL_NAME,
-    target_granularity="summary/short",
-    max_source_length=MAX_SOURCE_LENGTH,
-    max_target_length=MAX_TARGET_LENGTH,
-     )
+        parsed_data=data,
+        tokenizer_name=MODEL_NAME,
+        target_granularity="summary/short",
+        max_source_length=MAX_SOURCE_LENGTH,
+        max_target_length=MAX_TARGET_LENGTH,
+    )
 
+    # 1. FILTER EMPTY DATA (Prevents loss: 0 on blank summaries)
+    tokenized_dataset["train"] = tokenized_dataset["train"].filter(
+        lambda x: len(x["input_ids"]) > 2 and len(x["labels"]) > 2
+    )
+    tokenized_dataset["validation"] = tokenized_dataset["validation"].filter(
+        lambda x: len(x["input_ids"]) > 2 and len(x["labels"]) > 2
+    )
+
+    # 2. FIX THE CONFIG
     config = AutoConfig.from_pretrained(MODEL_NAME)
     config.tie_word_embeddings = True
 
-    model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME, from_flax=True)
-    
-    
-    # --- NEW PEFT/LORA CODE ---
-    lora_config = LoraConfig(
-    task_type=TaskType.SEQ_2_SEQ_LM,
-    r=8, 
-    lora_alpha=32,
-    lora_dropout=0.05,
-    target_modules=["q", "v"] # Targets attention mechanisms
-     )
+    # 3. LOAD NATIVE PYTORCH WEIGHTS (Bypasses Flax & Safetensors bugs)
+    print("Loading base model...")
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        MODEL_NAME, 
+        config=config,
+        use_safetensors=False 
+    )
 
+    # 4. SMOKE TEST
+    print("\n--- RUNNING EMBEDDING SMOKE TEST ---")
+    test_in = tokenizer("summarize: The quick brown fox jumps over the lazy dog.", return_tensors="pt")
+    out = model.generate(**test_in, max_new_tokens=20)
+    smoke_test_result = tokenizer.decode(out[0], skip_special_tokens=True)
+    print(f"Output: {smoke_test_result}")
+    print("------------------------------------\n")
+
+    # 5. APPLY LORA
+    lora_config = LoraConfig(
+        task_type=TaskType.SEQ_2_SEQ_LM,
+        r=8, 
+        lora_alpha=32,
+        lora_dropout=0.05,
+        target_modules=["q", "v"] 
+    )
     model = get_peft_model(model, lora_config)
 
     # Required for gradient checkpointing to work alongside LoRA
     model.enable_input_require_grads()
     model.print_trainable_parameters()
-    # --------------------------
 
 
     data_collator = DataCollatorForSeq2Seq(
