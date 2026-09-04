@@ -85,7 +85,10 @@ def build_compute_metrics(tokenizer):
 
 def train_teacher():
 
-    raw_data = load_multilexsum()
+    data = load_multilexsum(
+        raw_dir_path="./data/raw",
+        parsed_cache_path="./data/raw/multilexsum_parsed.pkl",
+    )
 
     tokenized_dataset, tokenizer = build_typed_tokenized_dataset(
     parsed_data=data,
