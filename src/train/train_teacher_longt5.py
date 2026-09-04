@@ -102,7 +102,7 @@ def train_teacher():
     config = AutoConfig.from_pretrained(MODEL_NAME)
     config.tie_word_embeddings = True
 
-    model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME, config=config)
+    model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME, from_flax=True)
     
     
     # --- NEW PEFT/LORA CODE ---
