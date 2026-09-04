@@ -20,7 +20,7 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 MODEL_NAME = "google/long-t5-tglobal-large"
-MAX_SOURCE_LENGTH = 4096
+MAX_SOURCE_LENGTH = 2048
 MAX_TARGET_LENGTH = 256
 
 rouge = evaluate.load("rouge")
