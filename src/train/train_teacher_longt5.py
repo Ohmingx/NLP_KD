@@ -116,10 +116,7 @@ def train_teacher():
         use_safetensors=False 
     )
 
-    # 2. FORCE HARD TIE THE WEIGHTS (Bypasses the Hub file conflict)
-    model.encoder.embed_tokens.weight = model.shared.weight
-    model.decoder.embed_tokens.weight = model.shared.weight
-    model.lm_head.weight = model.shared.weight
+    
 
     # 3. SMOKE TEST (with repetition penalty to prevent infinite loops on a fresh model)
     print("\n--- RUNNING EMBEDDING SMOKE TEST ---")
