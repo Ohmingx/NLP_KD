@@ -101,7 +101,13 @@ def train_teacher():
      )
 
     model = AutoModelForSeq2SeqLM.from_pretrained(MODEL_NAME)
-
+    
+    # --- CRITICAL FIX: MANUALLY TIE WEIGHTS ---
+    # Prevents the model from being initialized with random noise
+    model.encoder.embed_tokens.weight = model.shared.weight
+    model.decoder.embed_tokens.weight = model.shared.weight
+    model.lm_head.weight = model.shared.weight
+    # ------------------------------------------
     # --- NEW PEFT/LORA CODE ---
     lora_config = LoraConfig(
     task_type=TaskType.SEQ_2_SEQ_LM,
@@ -145,7 +151,7 @@ def train_teacher():
         max_grad_norm=1.0,
         warmup_ratio=0.05,
 
-        optim="adamw_8bit",
+        optim="adamw_torch",
         weight_decay=0.01,
 
         save_total_limit=2,
